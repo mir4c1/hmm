@@ -1,0 +1,603 @@
+(window.webpackJsonp_N_E = window.webpackJsonp_N_E || []).push([[6], {
+    "1MVt": function(e, t, a) {
+        "use strict";
+        var n = a("q1tI")
+          , r = a.n(n).a.createElement;
+        t.a = function(e) {
+            return r("div", {
+                className: e.className,
+                style: {
+                    backgroundImage: "url(/static/images/subjects/".concat(e.id, ".svg?v=1)")
+                }
+            }, e.children)
+        }
+    },
+    "R+Of": function(e, t, a) {
+        "use strict";
+        var n = a("q1tI")
+          , r = a.n(n).a.createElement;
+        t.a = function(e) {
+            return r("span", {
+                className: "gTitle"
+            }, r("h2", null, e.title))
+        }
+    },
+    RnYt: function(e, t, a) {
+        "use strict";
+        var n = a("rePB");
+        t.a = function(e, t) {
+            var a = arguments.length > 2 && void 0 !== arguments[2] ? arguments[2] : "name";
+            return (e.find((function(e) {
+                return e.id == t
+            }
+            )) || Object(n.a)({}, a, ""))[a]
+        }
+    },
+    YFqc: function(e, t, a) {
+        e.exports = a("cTJO")
+    },
+    cTJO: function(e, t, a) {
+        "use strict";
+        var n = a("J4zp")
+          , r = a("284h");
+        t.__esModule = !0,
+        t.default = void 0;
+        var c = r(a("q1tI"))
+          , u = a("elyg")
+          , o = a("nOHt")
+          , s = a("vNVm")
+          , i = {};
+        function l(e, t, a, n) {
+            if (e && (0,
+            u.isLocalURL)(t)) {
+                e.prefetch(t, a, n).catch((function(e) {
+                    0
+                }
+                ));
+                var r = n && "undefined" !== typeof n.locale ? n.locale : e && e.locale;
+                i[t + "%" + a + (r ? "%" + r : "")] = !0
+            }
+        }
+        var f = function(e) {
+            var t = !1 !== e.prefetch
+              , a = (0,
+            o.useRouter)()
+              , r = a && a.asPath || "/"
+              , f = c.default.useMemo((function() {
+                var t = (0,
+                u.resolveHref)(r, e.href, !0)
+                  , a = n(t, 2)
+                  , c = a[0]
+                  , o = a[1];
+                return {
+                    href: c,
+                    as: e.as ? (0,
+                    u.resolveHref)(r, e.as) : o || c
+                }
+            }
+            ), [r, e.href, e.as])
+              , d = f.href
+              , p = f.as
+              , v = e.children
+              , h = e.replace
+              , g = e.shallow
+              , m = e.scroll
+              , b = e.locale;
+            "string" === typeof v && (v = c.default.createElement("a", null, v));
+            var y = c.Children.only(v)
+              , O = y && "object" === typeof y && y.ref
+              , j = (0,
+            s.useIntersection)({
+                rootMargin: "200px"
+            })
+              , N = n(j, 2)
+              , k = N[0]
+              , w = N[1]
+              , E = c.default.useCallback((function(e) {
+                k(e),
+                O && ("function" === typeof O ? O(e) : "object" === typeof O && (O.current = e))
+            }
+            ), [O, k]);
+            (0,
+            c.useEffect)((function() {
+                var e = w && t && (0,
+                u.isLocalURL)(d)
+                  , n = "undefined" !== typeof b ? b : a && a.locale
+                  , r = i[d + "%" + p + (n ? "%" + n : "")];
+                e && !r && l(a, d, p, {
+                    locale: n
+                })
+            }
+            ), [p, d, w, b, t, a]);
+            var _ = {
+                ref: E,
+                onClick: function(e) {
+                    y.props && "function" === typeof y.props.onClick && y.props.onClick(e),
+                    e.defaultPrevented || function(e, t, a, n, r, c, o, s) {
+                        ("A" !== e.currentTarget.nodeName || !function(e) {
+                            var t = e.currentTarget.target;
+                            return t && "_self" !== t || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.nativeEvent && 2 === e.nativeEvent.which
+                        }(e) && (0,
+                        u.isLocalURL)(a)) && (e.preventDefault(),
+                        null == o && (o = n.indexOf("#") < 0),
+                        t[r ? "replace" : "push"](a, n, {
+                            shallow: c,
+                            locale: s,
+                            scroll: o
+                        }))
+                    }(e, a, d, p, h, g, m, b)
+                },
+                onMouseEnter: function(e) {
+                    (0,
+                    u.isLocalURL)(d) && (y.props && "function" === typeof y.props.onMouseEnter && y.props.onMouseEnter(e),
+                    l(a, d, p, {
+                        priority: !0
+                    }))
+                }
+            };
+            if (e.passHref || "a" === y.type && !("href"in y.props)) {
+                var D = "undefined" !== typeof b ? b : a && a.locale
+                  , R = a && a.isLocaleDomain && (0,
+                u.getDomainLocale)(p, D, a && a.locales, a && a.domainLocales);
+                _.href = R || (0,
+                u.addBasePath)((0,
+                u.addLocale)(p, D, a && a.defaultLocale))
+            }
+            return c.default.cloneElement(y, _)
+        };
+        t.default = f
+    },
+    glsg: function(e, t, a) {
+        "use strict";
+        var n = a("1OyB")
+          , r = a("vuIU")
+          , c = a("JX7q")
+          , u = a("Ji7U")
+          , o = a("md7G")
+          , s = a("foSv")
+          , i = a("rePB")
+          , l = a("q1tI")
+          , f = a.n(l)
+          , d = a("20a2")
+          , p = a.n(d)
+          , v = a("vDqi")
+          , h = a.n(v)
+          , g = a("rFDI");
+        function m(e, t) {
+            var a = Object.keys(e);
+            if (Object.getOwnPropertySymbols) {
+                var n = Object.getOwnPropertySymbols(e);
+                t && (n = n.filter((function(t) {
+                    return Object.getOwnPropertyDescriptor(e, t).enumerable
+                }
+                ))),
+                a.push.apply(a, n)
+            }
+            return a
+        }
+        function b(e) {
+            for (var t = 1; t < arguments.length; t++) {
+                var a = null != arguments[t] ? arguments[t] : {};
+                t % 2 ? m(Object(a), !0).forEach((function(t) {
+                    Object(i.a)(e, t, a[t])
+                }
+                )) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(a)) : m(Object(a)).forEach((function(t) {
+                    Object.defineProperty(e, t, Object.getOwnPropertyDescriptor(a, t))
+                }
+                ))
+            }
+            return e
+        }
+        function y(e) {
+            var t = function() {
+                if ("undefined" === typeof Reflect || !Reflect.construct)
+                    return !1;
+                if (Reflect.construct.sham)
+                    return !1;
+                if ("function" === typeof Proxy)
+                    return !0;
+                try {
+                    return Date.prototype.toString.call(Reflect.construct(Date, [], (function() {}
+                    ))),
+                    !0
+                } catch (e) {
+                    return !1
+                }
+            }();
+            return function() {
+                var a, n = Object(s.a)(e);
+                if (t) {
+                    var r = Object(s.a)(this).constructor;
+                    a = Reflect.construct(n, arguments, r)
+                } else
+                    a = n.apply(this, arguments);
+                return Object(o.a)(this, a)
+            }
+        }
+        var O = function(e) {
+            Object(u.a)(a, e);
+            var t = y(a);
+            function a(e) {
+                var r;
+                Object(n.a)(this, a),
+                r = t.call(this, e),
+                Object(i.a)(Object(c.a)(r), "changeAvatar", (function(e) {
+                    var t = r.props.data.user;
+                    t.logado || r.props.setData({
+                        user: b(b({}, t), {}, {
+                            avatar: e
+                        })
+                    })
+                }
+                )),
+                Object(i.a)(Object(c.a)(r), "changeName", (function(e) {
+                    var t = e.target.value;
+                    r.setState({
+                        name: t
+                    })
+                }
+                )),
+                Object(i.a)(Object(c.a)(r), "play", (function(e) {
+                    r._checkData() && r.props.joinGame(e)
+                }
+                ));
+                var u = r.props
+                  , o = u.rooms
+                  , s = u.ios
+                  , l = u.data
+                  , f = l.user
+                  , d = l.languages;
+                return r.state = {
+                    name: f.nome,
+                    rooms: o,
+                    ios: s,
+                    playActive: d.find((function(e) {
+                        return e.id == f.language
+                    }
+                    )).subjects.length
+                },
+                r._lang = e.lang.home,
+                r
+            }
+            return Object(r.a)(a, [{
+                key: "_checkData",
+                value: function() {
+                    var e = this.state.name
+                      , t = this.props.data.user
+                      , a = e.trim().replace(/\s+/g, " ");
+                    return !/^[^<>/\\:&;"'.,!?{}*\[\]]{2,18}$/i.test(a) || /(?:[\u2700-\u27bf]|(?:\ud83c[\udde6-\uddff]){2}|[\ud800-\udbff][\udc00-\udfff]|[\u0023-\u0039]\ufe0f?\u20e3|\u3299|\u3297|\u303d|\u3030|\u24c2|\ud83c[\udd70-\udd71]|\ud83c[\udd7e-\udd7f]|\ud83c\udd8e|\ud83c[\udd91-\udd9a]|\ud83c[\udde6-\uddff]|[\ud83c[\ude01-\ude02]|\ud83c\ude1a|\ud83c\ude2f|[\ud83c[\ude32-\ude3a]|[\ud83c[\ude50-\ude51]|\u203c|\u2049|[\u25aa-\u25ab]|\u25b6|\u25c0|[\u25fb-\u25fe]|\u00a9|\u00ae|\u2122|\u2139|\ud83c\udc04|[\u2600-\u26FF]|\u2b05|\u2b06|\u2b07|\u2b1b|\u2b1c|\u2b50|\u2b55|\u231a|\u231b|\u2328|\u23cf|[\u23e9-\u23f3]|[\u23f8-\u23fa]|\ud83c\udccf|\u2934|\u2935|[\u2190-\u21ff])/.test(a) ? (this.props.setPopup(g.a.ALERT, {
+                        text: this._lang.invalidNick,
+                        icon: "iconErro"
+                    }),
+                    !1) : (this.props.setData({
+                        user: b(b({}, t), {}, {
+                            nome: e
+                        })
+                    }),
+                    !0)
+                }
+            }, {
+                key: "nextScreen",
+                value: function(e) {
+                    if (this._checkData()) {
+                        var t = this.state.name
+                          , a = this.props.data.user
+                          , n = a.avatar
+                          , r = a.language;
+                        h.a.post("/req/user", {
+                            name: t,
+                            avatar: n,
+                            language: r
+                        }),
+                        p.a.push(e)
+                    }
+                }
+            }]),
+            a
+        }(f.a.Component);
+        t.a = O
+    },
+    vNVm: function(e, t, a) {
+        "use strict";
+        var n = a("J4zp");
+        t.__esModule = !0,
+        t.useIntersection = function(e) {
+            var t = e.rootMargin
+              , a = e.disabled || !u
+              , s = (0,
+            r.useRef)()
+              , i = (0,
+            r.useState)(!1)
+              , l = n(i, 2)
+              , f = l[0]
+              , d = l[1]
+              , p = (0,
+            r.useCallback)((function(e) {
+                s.current && (s.current(),
+                s.current = void 0),
+                a || f || e && e.tagName && (s.current = function(e, t, a) {
+                    var n = function(e) {
+                        var t = e.rootMargin || ""
+                          , a = o.get(t);
+                        if (a)
+                            return a;
+                        var n = new Map
+                          , r = new IntersectionObserver((function(e) {
+                            e.forEach((function(e) {
+                                var t = n.get(e.target)
+                                  , a = e.isIntersecting || e.intersectionRatio > 0;
+                                t && a && t(a)
+                            }
+                            ))
+                        }
+                        ),e);
+                        return o.set(t, a = {
+                            id: t,
+                            observer: r,
+                            elements: n
+                        }),
+                        a
+                    }(a)
+                      , r = n.id
+                      , c = n.observer
+                      , u = n.elements;
+                    return u.set(e, t),
+                    c.observe(e),
+                    function() {
+                        u.delete(e),
+                        c.unobserve(e),
+                        0 === u.size && (c.disconnect(),
+                        o.delete(r))
+                    }
+                }(e, (function(e) {
+                    return e && d(e)
+                }
+                ), {
+                    rootMargin: t
+                }))
+            }
+            ), [a, t, f]);
+            return (0,
+            r.useEffect)((function() {
+                if (!u && !f) {
+                    var e = (0,
+                    c.requestIdleCallback)((function() {
+                        return d(!0)
+                    }
+                    ));
+                    return function() {
+                        return (0,
+                        c.cancelIdleCallback)(e)
+                    }
+                }
+            }
+            ), [f]),
+            [p, f]
+        }
+        ;
+        var r = a("q1tI")
+          , c = a("0G5g")
+          , u = "undefined" !== typeof IntersectionObserver;
+        var o = new Map
+    },
+    wOhW: function(e, t, a) {
+        "use strict";
+        var n = a("1OyB")
+          , r = a("vuIU")
+          , c = a("JX7q")
+          , u = a("Ji7U")
+          , o = a("md7G")
+          , s = a("foSv")
+          , i = a("rePB")
+          , l = a("q1tI")
+          , f = a.n(l)
+          , d = a("r3VO")
+          , p = a("YFqc")
+          , v = a.n(p)
+          , h = a("i2FJ")
+          , g = a("rFDI")
+          , m = a("TSYQ")
+          , b = a.n(m)
+          , y = f.a.createElement;
+        var O = Object(d.a)((function(e) {
+            var t = e.data
+              , a = t.user
+              , n = t.news
+              , r = e.home
+              , c = e.setPopup
+              , u = e.lang.header;
+            return y("header", {
+                className: b()({
+                    hide: !r
+                })
+            }, y("div", {
+                className: b()({
+                    logged: !r
+                })
+            }, y("div", {
+                className: "getApp"
+            }, y("h5", null, u.getApp), y("span", null, y("a", {
+                className: "ic-gPlay",
+                href: "https://play.google.com/store/apps/details?id=io.gartic.Gartic"
+            }, y("p", null, u.android)), y("a", {
+                className: "ic-iOS",
+                href: "https://itunes.apple.com/us/app/gartic-io/id1270393677?mt=8"
+            }, y("p", null, u.ios)))), y("div", {
+                className: b()("logo", {
+                    internal: !r
+                })
+            }, y(v.a, {
+                href: "/"
+            }, y("figure", null)), r && y("span", null, "DRAW, GUESS, WIN")), r ? y("a", {
+                href: n.link,
+                target: "_blank",
+                className: "lastUpdates"
+            }, y("h5", null, u.lastUpdates), y("span", null, y("strong", null), y("p", null, n.title))) : y(f.a.Fragment, null, y("div", {
+                className: "userLogged"
+            }, a.logado ? y(f.a.Fragment, null, y("div", {
+                className: "infos"
+            }, y("span", null, a.nome), y("a", {
+                href: "/logout",
+                className: "ic-logout"
+            }, y("p", null, u.logout))), y(v.a, {
+                href: "/"
+            }, y("div", null, y(h.a, {
+                url: a.avatar
+            })))) : y(f.a.Fragment, null, y("div", {
+                className: "infos"
+            }, y("span", null, a.nome)), y(v.a, {
+                href: "/"
+            }, y("div", null, y(h.a, {
+                type: a.avatar
+            })))))), y("div", {
+                className: "mobileActions"
+            }, y(v.a, {
+                href: "/options"
+            }, y("div", {
+                className: "options"
+            }, y("div", {
+                className: "icon"
+            }), y("span", null, u.info))), a.logado ? y("a", {
+                className: "logout",
+                href: "/logout"
+            }, y("div", {
+                className: "icon"
+            }), y("span", null, u.logout)) : y("div", {
+                className: "login",
+                onClick: function() {
+                    return c(g.a.LOGIN, {
+                        retorno: "home"
+                    })
+                }
+            }, y("div", {
+                className: "icon"
+            }), y("span", null, u.login)))))
+        }
+        ))
+          , j = f.a.createElement;
+        var N = Object(d.a)((function(e) {
+            var t = e.setPopup
+              , a = e.lang.footer;
+            return j("footer", null, j("a", {
+                href: "https://gartic.com/",
+                target: "_blank",
+                className: "gartic"
+            }), j("nav", null, j(v.a, {
+                href: "/download"
+            }, j("a", {
+                href: "/download"
+            }, a.download)), j("a", {
+                href: "/service.txt",
+                target: "_blank"
+            }, a.termsService), j("a", {
+                href: "/privacy.txt",
+                target: "_blank"
+            }, a.privacy), j(v.a, {
+                href: "/thanks"
+            }, j("a", {
+                href: "/thanks"
+            }, a.specialThanks)), j("a", {
+                onClick: function() {
+                    return t(g.a.CONTACT)
+                }
+            }, a.contact)), j("div", {
+                className: "follow"
+            }, j("a", {
+                href: "https://twitter.com/gartic",
+                className: "ic-twitter",
+                target: "_blank"
+            }), j("a", {
+                href: "https://youtube.com/gartic",
+                className: "ic-youtube",
+                target: "_blank"
+            }), j("a", {
+                href: "https://instagram.com/gartic",
+                className: "ic-instagram",
+                target: "_blank"
+            }), j("a", {
+                href: "https://discord.gg/gartic",
+                className: "ic-discord",
+                target: "_blank"
+            })))
+        }
+        ))
+          , k = f.a.createElement;
+        function w(e) {
+            var t = function() {
+                if ("undefined" === typeof Reflect || !Reflect.construct)
+                    return !1;
+                if (Reflect.construct.sham)
+                    return !1;
+                if ("function" === typeof Proxy)
+                    return !0;
+                try {
+                    return Date.prototype.toString.call(Reflect.construct(Date, [], (function() {}
+                    ))),
+                    !0
+                } catch (e) {
+                    return !1
+                }
+            }();
+            return function() {
+                var a, n = Object(s.a)(e);
+                if (t) {
+                    var r = Object(s.a)(this).constructor;
+                    a = Reflect.construct(n, arguments, r)
+                } else
+                    a = n.apply(this, arguments);
+                return Object(o.a)(this, a)
+            }
+        }
+        var E = function(e) {
+            Object(u.a)(a, e);
+            var t = w(a);
+            function a() {
+                var e;
+                Object(n.a)(this, a);
+                for (var r = arguments.length, u = new Array(r), o = 0; o < r; o++)
+                    u[o] = arguments[o];
+                return e = t.call.apply(t, [this].concat(u)),
+                Object(i.a)(Object(c.a)(e), "state", {
+                    height: null
+                }),
+                Object(i.a)(Object(c.a)(e), "resize", (function() {
+                    var t = e.state.height
+                      , a = window.innerHeight - 50;
+                    (!t || a > t) && e.setState({
+                        height: a
+                    })
+                }
+                )),
+                e
+            }
+            return Object(r.a)(a, [{
+                key: "componentDidMount",
+                value: function() {
+                    this.props.data.mobile && this.props.fixed && (this.resize(),
+                    window.addEventListener("resize", this.resize, !1),
+                    this._resizeApplied = !0)
+                }
+            }, {
+                key: "componentWillUnmount",
+                value: function() {
+                    this._resizeApplied && window.removeEventListener("resize", this.resize, !1)
+                }
+            }, {
+                key: "render",
+                value: function() {
+                    var e = this.state.height;
+                    return k("div", {
+                        className: "screenSystem",
+                        style: {
+                            height: e ? e + "px" : ""
+                        }
+                    }, k("div", {
+                        id: "screens"
+                    }, k(O, this.props), k("div", null, this.props.children), k(N, null)))
+                }
+            }]),
+            a
+        }(f.a.Component);
+        t.a = Object(d.a)(E)
+    }
+}]);
