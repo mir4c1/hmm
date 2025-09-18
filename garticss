@@ -586,6 +586,90 @@ button {
     z-index: 5;
 }
 
+.btBlueBig span,.btBlueBig span:after,.btYellowBig span,.btYellowBig span:after {
+    position: absolute;
+    left: 50%;
+    -webkit-transform: translateX(-50%);
+    -moz-transform: translateX(-50%);
+    -ms-transform: translateX(-50%);
+    -o-transform: translateX(-50%);
+    transform: translateX(-50%)
+}
+
+.btBlueBig span:after,.btYellowBig span:after {
+    bottom: -12px;
+    content: "";
+    border-color: #042c70 transparent transparent;
+    border-style: solid;
+    border-width: 15px 10px 0;
+    z-index: 5
+}
+
+.btYellowBig {
+    background-color: #ffbf00;
+    border-top-color: #ffe100;
+    border-bottom-color: #f88700
+}
+
+.btYellowBig:hover {
+    background-color: #ffcb00;
+    border-top-color: #ffef7c;
+    border-bottom-color: #f88700
+}
+
+.btYellowBig:active {
+    border-top-width: 3px;
+    border-bottom-width: 1px;
+    background-color: #ffab00;
+    border-top-color: #ffab00;
+    border-bottom-color: #ffab00
+}
+
+.btYellowBig:disabled {
+    cursor: auto;
+    background-color: #d8d6d3;
+    border-top-color: #f8f8f8;
+    border-bottom-color: #96928b;
+    overflow: visible
+}
+
+.btYellowBig:disabled strong {
+    color: #87847f
+}
+
+.btYellowBig:disabled:before {
+    -webkit-filter: grayscale(100%) opacity(.5);
+    -moz-filter: grayscale(100%) opacity(.5);
+    -ms-filter: grayscale(100%) opacity(.5);
+    -o-filter: grayscale(100%) opacity(.5);
+    filter: grayscale(100%) opacity(.5)
+}
+
+.btYellowBig:disabled:hover span {
+    display: block;
+    opacity: 1
+}
+
+.btBlueBig {
+    background-color: #13bafe;
+    border-top-color: #66cfff;
+    border-bottom-color: #248aed
+}
+
+.btBlueBig:hover {
+    background-color: #3fc8ff;
+    border-top-color: #b1fdff;
+    border-bottom-color: #006ad0
+}
+
+.btBlueBig:active {
+    border-top-width: 3px;
+    border-bottom-width: 1px;
+    background-color: #38bcf0;
+    border-top-color: #38bcf0;
+    border-bottom-color: #38bcf0
+}
+
 .loginDiscord,.loginFacebook,.loginGoogle,.loginReddit,.loginTwitter,.loginVK,.loginWeibo {
     width: 178px;
     height: 35px;
