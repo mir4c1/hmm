@@ -209,11 +209,13 @@ class PastelLiveManager {
 class pastelLiveSockett {
     constructor() {
         this.manager = new PastelLiveManager();
-        this.sockets = new Set();
+        this.sockets = new Map();
         this.pingInterval = null;
         this.actions = {
-            "5": (ws, data) => {
-                // Initial player list after physical join
+            "5": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 ws.botID = data[2];
                 ws.botlongID = data[1];
                 
@@ -229,13 +231,16 @@ class pastelLiveSockett {
                     text: `${ws.roomCode} ~ Pastel Active! (Physical Join)`
                 });
 
-                // Send status message
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send(`42[46,${data[2]}]`);
-                }
+                // Send status message back to main thread
+                self.postMessage({
+                    type: 'ws:send',
+                    details: { wsId: wsId, message: `42[46,${data[2]}]` }
+                });
             },
-            "23": (ws, data) => {
-                // Player joined
+            "23": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 data[1].foto ||= `https://gartic.io/static/images/avatar/svg/${data[1].avatar}.svg`;
                 this.manager.addPlayer(ws.language, ws.roomCode, data[1]);
                 this.manager.addMessage({
@@ -245,8 +250,10 @@ class pastelLiveSockett {
                     text: `${ws.roomCode} ~ ${data[1].nick} Joined!`
                 });
             },
-            "24": (ws, data) => {
-                // Player left
+            "24": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 const player = this.manager.getPlayer(ws.language, ws.roomCode, data[1]);
                 if (player) {
                     this.manager.removePlayer(ws.language, ws.roomCode, data[1]);
@@ -258,8 +265,10 @@ class pastelLiveSockett {
                     });
                 }
             },
-            "11": (ws, data) => {
-                // Chat message
+            "11": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 const player = this.manager.getPlayer(ws.language, ws.roomCode, data[1]);
                 if (player) {
                     this.manager.addMessage({
@@ -272,8 +281,10 @@ class pastelLiveSockett {
                     });
                 }
             },
-            "13": (ws, data) => {
-                // Answer message
+            "13": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 const player = this.manager.getPlayer(ws.language, ws.roomCode, data[1]);
                 if (player) {
                     this.manager.addMessage({
@@ -286,8 +297,10 @@ class pastelLiveSockett {
                     });
                 }
             },
-            "45": (ws, data) => {
-                // Vote kick
+            "45": (wsId, data) => {
+                const ws = this.sockets.get(wsId);
+                if (!ws) return;
+                
                 const player1 = this.manager.getPlayer(ws.language, ws.roomCode, data[1]);
                 const player2 = this.manager.getPlayer(ws.language, ws.roomCode, data[2]);
                 if (player1 && player2) {
@@ -299,84 +312,60 @@ class pastelLiveSockett {
                     });
                 }
             },
-            "6": (ws, data) => {
-                // Error - remove socket
+            "6": (wsId, data) => {
                 if (data[1] === 6) {
-                    this.removeSocket(ws);
+                    this.removeSocket(wsId);
                     self.postMessage({
                         type: 'log',
-                        details: { message: `Room ${ws.roomCode} closed or error` }
+                        details: { message: `Room closed or error` }
                     });
                 }
             }
         };
     }
 
-    async createSocket(ip, language, roomCode, serverText = null, cookie = null) {
+    async createSocket(wsId, ip, language, roomCode, serverText, cookie) {
         try {
-            // Get fresh token
             const token = await getFreshToken();
             
-            // Extract server and c parameter from serverText
             let server, cParam;
             if (serverText && serverText.includes("://")) {
                 server = new URL(serverText).hostname.split(".")[0];
                 const cMatch = serverText.match(/c=([^&\s]+)/);
                 cParam = cMatch ? cMatch[1] : '';
             } else {
-                // Fallback
                 server = "server06";
                 cParam = '';
             }
 
             const roomSuffix = roomCode.substring(roomCode.length - 4);
             
-            // Create WebSocket URL with c parameter
-            const wsUrl = `wss://${ip}/__cpw.php?u=${btoa(`wss://${server}.gartic.io/socket.io/?c=${cParam}&EIO=3&transport=websocket&t=${Date.now()}`)}&o=aHR0cHM6Ly9nYXJ0aWMuaW8=`;
+            // Store socket info
+            this.sockets.set(wsId, {
+                ip: ip,
+                language: String(language),
+                roomCode: roomCode,
+                token: token,
+                cookie: cookie,
+                botID: null,
+                botlongID: null
+            });
+
+            // Build WebSocket URL with cookie in query string
+            const baseWsUrl = `wss://${server}.gartic.io/socket.io/?c=${cParam}&EIO=3&transport=websocket&t=${Date.now()}`;
+            const wsUrl = `wss://${ip}/__cpw.php?u=${btoa(baseWsUrl)}&o=aHR0cHM6Ly9nYXJ0aWMuaW8=`;
             
-            const ws = new WebSocket(wsUrl);
-            ws.ip = ip;
-            ws.language = String(language);
-            ws.roomCode = roomCode;
-            ws.token = token;
-            ws.botID = null;
-            ws.botlongID = null;
-
-            ws.onopen = () => {
-                setTimeout(() => {
-                    if (ws.readyState === WebSocket.OPEN) {
-                        // Physical join with token
-                        const joinMessage = `42[3,{"v":20000,"token":"${token}","nick":"userallah","avatar":0,"platform":0,"sala":"${roomSuffix}"}]`;
-                        ws.send(joinMessage);
-                        
-                        self.postMessage({
-                            type: 'log',
-                            details: { message: `Physical join sent to ${roomCode}` }
-                        });
-                    }
-                }, 20);
-            };
-
-            ws.onmessage = e => {
-                const d = e.data;
-                if (!d || d.length < 3) return;
-                
-                // Skip error messages
-                if (d[0] === '4' && d[1] === '2' && d[2] === '"' && d[3] === '1' && d[4] === '0') return;
-                
-                try {
-                    const parsed = JSON.parse(d.substring(2));
-                    this.handleMessage(ws, parsed);
-                } catch (error) {
-                    console.error("Parse error:", error);
+            // Request main thread to open WebSocket with cookie
+            self.postMessage({
+                type: 'ws:create',
+                details: {
+                    wsId: wsId,
+                    url: wsUrl,
+                    cookie: cookie,
+                    joinMessage: `42[3,{"v":20000,"token":"${token}","nick":"userallah","avatar":0,"platform":0,"sala":"${roomSuffix}"}]`
                 }
-            };
+            });
 
-            ws.onerror = ws.onclose = () => {
-                this.removeSocket(ws);
-            };
-
-            this.sockets.add(ws);
             if (!this.pingInterval) this.startPing();
 
         } catch (error) {
@@ -387,10 +376,22 @@ class pastelLiveSockett {
         }
     }
 
-    removeSocket(ws) {
-        if (this.sockets.delete(ws)) {
-            ws.close();
+    handleMessage(wsId, messageData) {
+        try {
+            const parsed = JSON.parse(messageData.substring(2));
+            this.actions[parsed[0]]?.(wsId, parsed);
+        } catch (error) {
+            console.error("Parse error:", error);
         }
+    }
+
+    removeSocket(wsId) {
+        this.sockets.delete(wsId);
+        self.postMessage({
+            type: 'ws:close',
+            details: { wsId: wsId }
+        });
+        
         if (this.sockets.size === 0) {
             this.stopPing();
         }
@@ -398,12 +399,11 @@ class pastelLiveSockett {
 
     startPing() {
         this.pingInterval = setInterval(() => {
-            for (const ws of this.sockets) {
-                if (ws.readyState === WebSocket.OPEN) {
-                    ws.send("2");
-                } else {
-                    this.removeSocket(ws);
-                }
+            for (const [wsId, ws] of this.sockets) {
+                self.postMessage({
+                    type: 'ws:send',
+                    details: { wsId: wsId, message: "2" }
+                });
             }
         }, 7777);
     }
@@ -411,10 +411,6 @@ class pastelLiveSockett {
     stopPing() {
         clearInterval(this.pingInterval);
         this.pingInterval = null;
-    }
-
-    handleMessage(ws, data) {
-        this.actions[data[0]]?.(ws, data);
     }
 }
 
@@ -441,7 +437,9 @@ self.onmessage = ({ data }) => {
             break;
         case 'create:socket':
             if (details.task === "live") {
+                const wsId = `ws_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
                 pastelLiveSocket.createSocket(
+                    wsId,
                     details.ip,
                     details.language,
                     details.roomCode,
@@ -449,6 +447,14 @@ self.onmessage = ({ data }) => {
                     details.cookie
                 );
             }
+            break;
+        case 'ws:message':
+            // Message received from main thread
+            pastelLiveSocket.handleMessage(details.wsId, details.data);
+            break;
+        case 'ws:closed':
+            // WebSocket closed from main thread
+            pastelLiveSocket.removeSocket(details.wsId);
             break;
         default:
             console.log('undefined type:', type, details);
