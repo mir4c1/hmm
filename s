@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name            Gartic anti2
-// @version          10.4
+// @version          10.5
 // @match            *://gartic.io/*
 // @run-at           document-start
 // @grant            unsafeWindow
@@ -16,16 +16,12 @@ var win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window,
 var myBotID = null, myLongID = null, isRejoinInProgress = false, gameSocket = null, kickCooldown = false;
 
 // --- VOTEKICK TAKİBİ ---
-// Her hedef kullanıcı için mevcut oy sayısını tutar: { targetId: voteCount }
 var voteTracker = {};
 
-// Odadaki kullanıcı sayısına göre kick eşiğini hesaplar
-// Math.max(2, Math.ceil((users.length + 1) / 3))
 function getVoteThreshold(userCount) {
     return Math.max(2, Math.ceil((userCount + 1) / 3));
 }
 
-// Bota ait oy takibini sıfırla (oda değişiminde vs.)
 function resetVoteTracker() {
     voteTracker = {};
 }
@@ -62,64 +58,36 @@ function resetVoteTracker() {
                     resetVoteTracker();
                 }
 
-                // --- VOTEKICK EVENT: 42[45, userId, targetId, voteCount] ---
-                // Sunucudan gelen votekick bildirimi — oylar hedef kullanıcıya geldi
+                // --- VOTEKICK EVENT ---
                 if(msg.indexOf('42[45,') !== -1 || msg.indexOf('42["45"') !== -1){
                     try {
                         var rawStart = msg.indexOf('42[45,') !== -1
                             ? msg.indexOf('42[45,')
                             : msg.indexOf('42["45"');
                         var rawArr = JSON.parse(msg.substring(rawStart + 2));
-                        // rawArr: [45, userId, targetId, voteCount]
-                        // veya    ["45", userId, targetId, voteCount]
                         var targetId  = rawArr[2];
-                        var voteCount = rawArr[3]; // sunucunun gönderdiği güncel oy sayısı
+                        var voteCount = rawArr[3];
 
-                        // Bu oy bize mi geldi?
                         if(targetId === myBotID || targetId === myLongID){
-
-                            // Sunucu tarafındaki oy sayısını güncelle
                             voteTracker[targetId] = voteCount;
-
-                            // Odadaki kullanıcı sayısını al
                             var userCount = 0;
                             try {
                                 var gameObj = _owner._game;
-                                if(gameObj && gameObj.users){
-                                    userCount = gameObj.users.length;
-                                }
+                                if(gameObj && gameObj.users) userCount = gameObj.users.length;
                             } catch(x){}
-
-                            // Eşiği hesapla: Math.max(2, Math.ceil((userCount + 1) / 3))
                             var threshold = getVoteThreshold(userCount);
-
-                            // Eşiğe 1 kala çık — ikinci oy gelmeden önce kendin çık
-                            // Örn: 5 kişilik odada threshold=2, voteCount=1 → hemen çık
-                            // Örn: 8 kişilik odada threshold=3, voteCount=2 → hemen çık
                             if(voteCount >= threshold - 1 && !isRejoinInProgress && !kickCooldown){
                                 isRejoinInProgress = true;
                                 kickCooldown = true;
-
-                                // Temiz çıkış: 24 paketi gönder
                                 try {
-                                    if(gameSocket && gameSocket.readyState === 1){
+                                    if(gameSocket && gameSocket.readyState === 1)
                                         gameSocket.send('42[24,' + myBotID + ']');
-                                    }
                                 } catch(x){}
-
-                                // Socket'i kes ve yeniden bağlan
                                 setTimeout(function(){
-                                    try {
-                                        var p = _owner._play;
-                                        if(p && p._socket) p._socket.disconnect();
-                                    } catch(x){}
-                                    try {
-                                        if(gameSocket && gameSocket.readyState !== 3) gameSocket.close();
-                                    } catch(x){}
+                                    try { var p = _owner._play; if(p && p._socket) p._socket.disconnect(); } catch(x){}
+                                    try { if(gameSocket && gameSocket.readyState !== 3) gameSocket.close(); } catch(x){}
                                     try { if(_owner._game) delete _owner._game; } catch(x){}
                                     resetVoteTracker();
-
-                                    // Rejoin
                                     setTimeout(function(){
                                         try {
                                             var p = _owner._play;
@@ -131,7 +99,6 @@ function resetVoteTracker() {
                                         } catch(x){}
                                         setTimeout(function(){ isRejoinInProgress = false; }, 5000);
                                     }, 800);
-
                                 }, 300);
                             }
                         }
@@ -150,9 +117,8 @@ function resetVoteTracker() {
                             isRejoinInProgress = true;
                             kickCooldown = true;
                             try {
-                                if(gameSocket && gameSocket.readyState === 1){
+                                if(gameSocket && gameSocket.readyState === 1)
                                     gameSocket.send('42[24,' + myBotID + ']');
-                                }
                             } catch(x){}
                             setTimeout(function(){
                                 try { var p = _owner._play; if(p && p._socket) p._socket.disconnect(); } catch(x){}
@@ -175,40 +141,27 @@ function resetVoteTracker() {
                     } catch(x){}
                 }
 
-                // Doğrudan kick: 42["45"] veya eski format
+                // Doğrudan kick
                 if(msg.includes('42["45"') || msg.includes('42[45,')){
                     var kickData;
                     try {
                         if(msg.startsWith('42["45"')) kickData = JSON.parse(msg.substring(2));
                         else if(msg.startsWith('42[45,')) kickData = JSON.parse(msg.substring(2));
                     } catch(x){}
-
-                    if(kickData && kickData.length >= 3){
+                    if(kickData && kickData.length === 3){
                         var kickedID = kickData[2];
-                        // Bu blok sadece gerçek kick paketleri için — votekick değil
-                        // kickData[0] === 45 ise ve length === 3 ise bu kick kararı
-                        // length === 4 ise bu votekick bildirimi (yukarıda işlendi)
-                        if(kickData.length === 3 && (kickedID === myBotID || kickedID === myLongID) && !isRejoinInProgress && !kickCooldown){
+                        if((kickedID === myBotID || kickedID === myLongID) && !isRejoinInProgress && !kickCooldown){
                             isRejoinInProgress = true;
                             kickCooldown = true;
-
                             try {
-                                if(gameSocket && gameSocket.readyState === 1){
+                                if(gameSocket && gameSocket.readyState === 1)
                                     gameSocket.send('42[24,' + myBotID + ']');
-                                }
                             } catch(x){}
-
                             setTimeout(function(){
-                                try {
-                                    var p = _owner._play;
-                                    if(p && p._socket) p._socket.disconnect();
-                                } catch(x){}
-                                try {
-                                    if(gameSocket && gameSocket.readyState !== 3) gameSocket.close();
-                                } catch(x){}
+                                try { var p = _owner._play; if(p && p._socket) p._socket.disconnect(); } catch(x){}
+                                try { if(gameSocket && gameSocket.readyState !== 3) gameSocket.close(); } catch(x){}
                                 try { if(_owner._game) delete _owner._game; } catch(x){}
                                 resetVoteTracker();
-
                                 setTimeout(function(){
                                     try {
                                         var p = _owner._play;
@@ -220,7 +173,6 @@ function resetVoteTracker() {
                                     } catch(x){}
                                     setTimeout(function(){ isRejoinInProgress = false; }, 5000);
                                 }, 800);
-
                             }, 400);
                         }
                     }
@@ -326,7 +278,6 @@ function prefetch(){
         }
     });
 
-    // Callback bazen tetiklenmeyebilir — hidden input'u polling ile oku
     var pollStart=Date.now();
     pollTimer=setInterval(function(){
         var inp=document.querySelector('#'+id+' input[name="cf-turnstile-response"]');
@@ -471,6 +422,24 @@ function onJoin(game){
     resetVoteTracker();
     setTimeout(function(){ kickCooldown = false; }, 500);
 
+    // =============================================
+    // ANTI-AFK: avisoInativo eventini dinle
+    // game.active() çağrısı:
+    //   - game._ativo = Date.now() günceller
+    //   - socket.emit(42, codigo) gönderir
+    // Bu, 150 saniye dolmadan önce tetiklenir.
+    // Popup DOM'a gelmeden önce aktiflik gönderilir.
+    // =============================================
+    if(game && typeof game.on === 'function'){
+        game.on('avisoInativo', function(){
+            try {
+                if(typeof game.active === 'function'){
+                    game.active();
+                }
+            } catch(x){}
+        });
+    }
+
     var room=document.querySelector('#screenRoom');
     if(room&&!room.__directExitBound){
         room.__directExitBound=true;
@@ -497,71 +466,6 @@ function onJoin(game){
             delete _owner._game;
         }
     },{passive:false,once:true});
-    // --- AFK: avisoInativo override ---
-    // Ham socket gönderimi YOK. Yalnızca timestamp güncelle,
-    // popup Gartic tarafından normal şekilde açılsın.
-    if(game && game._events){
-        game._events.avisoInativo = function(){
-            try{ game._ativo = Date.now(); }catch(e){}
-        };
-    }
-
-    // AFK popup observer'ını başlat
-    afkOnayiniBagla(game);
-}
-
-// --- AFK YARDIMCI FONKSİYONLAR ---
-
-// game.active() veya game._active() varsa çağır — ham socket asla
-function aktifligiOnayla(game){
-    if(!game) return false;
-    try{
-        if(typeof game.active === 'function'){ game.active(); return true; }
-        if(typeof game._active === 'function'){ game._active(); return true; }
-    }catch(e){}
-    return false;
-}
-
-// Popup'ın AFK/aktiflik uyarısı olup olmadığını metninden kontrol et
-function afkPopupMi(popup){
-    if(!popup) return false;
-    var metin = (popup.textContent || '').toLowerCase();
-    return /are you there|still there|inactive|inactivity|afk|burada m[iı]s[iı]n|h[aâ]l[aâ] orada m[iı]s[iı]n|aktif de[gğ]il|etkin de[gğ]il/.test(metin);
-}
-
-// Popup içindeki aktiflik onay butonunu bul
-function aktiflikButonuBul(popup){
-    var seciciler = 'button,[role="button"],input[type="button"],input[type="submit"]';
-    var butonlar = popup.querySelectorAll(seciciler);
-    for(var i = 0; i < butonlar.length; i++){
-        var b = butonlar[i];
-        var yazi = ((b.textContent || '') + ' ' + (b.value || '') + ' ' +
-                    (b.getAttribute('aria-label') || '') + ' ' +
-                    (b.getAttribute('title') || '')).toLowerCase();
-        if(/yes|ok|confirm|continue|active|stay|tamam|evet|onayla|devam|buradayım|buradayim|aktif kal/.test(yazi)) return b;
-    }
-    return null;
-}
-
-// onJoin'dan sonra bir kez çağrılır — AFK popup'ını izler
-function afkOnayiniBagla(game){
-    if(!game || game.__afkObserver || !document.body) return;
-
-    var gozlemci = new MutationObserver(function(){
-        var adaylar = document.querySelectorAll('#popUp,.contentPopup,[class*="popup"]');
-        adaylar.forEach(function(popup){
-            if(!afkPopupMi(popup) || popup.__afkBagli) return;
-            var buton = aktiflikButonuBul(popup);
-            if(!buton) return;
-            popup.__afkBagli = true;
-            buton.addEventListener('click', function(){
-                aktifligiOnayla(game);
-            }, true);
-        });
-    });
-
-    gozlemci.observe(document.body, {childList: true, subtree: true});
-    game.__afkObserver = gozlemci;
 }
 
 })();
