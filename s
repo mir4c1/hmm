@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name            Gartic anti2
+// @name            Gartic anti3
 // @version          10.5
 // @match            *://gartic.io/*
 // @run-at           document-start
@@ -330,12 +330,19 @@ observe('div#content',function(el){
 
 observe('div#screenRoom',function(el){
     var walk=function(n){
-        if(!n||_owner._game) return;
-        if(n.tag===1){ var g=n.stateNode?.props?.children?.[0]?._owner?.stateNode?._game; if(g){_owner._game=g; onJoin(g); return;} }
+        if(!n) return;
+        if(n.tag===1){
+            var g=n.stateNode?.props?.children?.[0]?._owner?.stateNode?._game;
+            if(g&&g!==_owner._game){
+                _owner._game=g;
+                onJoin(g);
+                return;
+            }
+        }
         walk(n.child);
     };
     for(var k in el) if(k.startsWith('__react')) walk(el[k]);
-},1);
+},0);
 
 function patch(p){
     if(p._data&&p._data.user){
@@ -422,22 +429,19 @@ function onJoin(game){
     resetVoteTracker();
     setTimeout(function(){ kickCooldown = false; }, 500);
 
-    // =============================================
-    // ANTI-AFK: avisoInativo eventini dinle
-    // game.active() çağrısı:
-    //   - game._ativo = Date.now() günceller
-    //   - socket.emit(42, codigo) gönderir
-    // Bu, 150 saniye dolmadan önce tetiklenir.
-    // Popup DOM'a gelmeden önce aktiflik gönderilir.
-    // =============================================
-    if(game && typeof game.on === 'function'){
-        game.on('avisoInativo', function(){
-            try {
-                if(typeof game.active === 'function'){
-                    game.active();
-                }
-            } catch(x){}
-        });
+    if(game&&!game.__afkNativeBagli){
+        var aktiflik=function(){
+            try{ if(typeof game.active==='function') game.active(); }catch(x){}
+        };
+        try{
+            if(typeof game.prependListener==='function'){
+                game.prependListener('avisoInativo',aktiflik);
+                game.__afkNativeBagli=true;
+            }else if(typeof game.on==='function'){
+                game.on('avisoInativo',aktiflik);
+                game.__afkNativeBagli=true;
+            }
+        }catch(x){}
     }
 
     var room=document.querySelector('#screenRoom');
