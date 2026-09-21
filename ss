@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name            Gartic anti3
-// @version          10.5
+// @name            Gartic anti3 + AFK Patch
+// @version          11.0
 // @match            *://gartic.io/*
 // @run-at           document-start
 // @grant            unsafeWindow
@@ -16,12 +16,35 @@ var myBotID = null, myLongID = null, isRejoinInProgress = false, gameSocket = nu
 
 var voteTracker = {};
 
+// AFK: her game instance icin tutulan timer referansi
+var _afkGarantiTimer = null;
+
 function getVoteThreshold(userCount) {
     return Math.max(2, Math.ceil((userCount + 1) / 3));
 }
 
 function resetVoteTracker() {
     voteTracker = {};
+}
+
+// AFK garantili timer'i temizler (rejoin / cikis oncesi cagrilir)
+function clearAfkTimer() {
+    if (_afkGarantiTimer) {
+        clearInterval(_afkGarantiTimer);
+        _afkGarantiTimer = null;
+    }
+}
+
+// AFK garantili timer'i baslatir — her 60sn'de bir game.active() cagirir
+function startAfkTimer(game) {
+    clearAfkTimer();
+    _afkGarantiTimer = setInterval(function() {
+        try {
+            if (typeof game.active === 'function') {
+                game.active();
+            }
+        } catch(x) {}
+    }, 60000);
 }
 
 (function hookWebSocket(){
@@ -74,6 +97,7 @@ function resetVoteTracker() {
                             if(voteCount >= threshold - 1 && !isRejoinInProgress && !kickCooldown){
                                 isRejoinInProgress = true;
                                 kickCooldown = true;
+                                clearAfkTimer();
                                 try {
                                     if(gameSocket && gameSocket.readyState === 1)
                                         gameSocket.send('42[24,' + myBotID + ']');
@@ -110,6 +134,7 @@ function resetVoteTracker() {
                         if((kickedId === myBotID || kickedId === myLongID) && !isRejoinInProgress && !kickCooldown){
                             isRejoinInProgress = true;
                             kickCooldown = true;
+                            clearAfkTimer();
                             try {
                                 if(gameSocket && gameSocket.readyState === 1)
                                     gameSocket.send('42[24,' + myBotID + ']');
@@ -146,6 +171,7 @@ function resetVoteTracker() {
                         if((kickedID === myBotID || kickedID === myLongID) && !isRejoinInProgress && !kickCooldown){
                             isRejoinInProgress = true;
                             kickCooldown = true;
+                            clearAfkTimer();
                             try {
                                 if(gameSocket && gameSocket.readyState === 1)
                                     gameSocket.send('42[24,' + myBotID + ']');
@@ -409,6 +435,7 @@ function patch(p){
         if(isRejoinInProgress) return;
         if(code===null||code===undefined){ prefetch(); return; }
         if([1,2,7,9].indexOf(code)!==-1&&p._lastJoinArgs){
+            clearAfkTimer();
             try{ p._socket&&p._socket.disconnect(); }catch(x){}
             var a=p._lastJoinArgs;
             setTimeout(function(){ if(a.data)a.data.timeExit=0; p.start(a.data,a.room,a.viewer); },1500);
@@ -422,6 +449,7 @@ function onJoin(game){
     resetVoteTracker();
     setTimeout(function(){ kickCooldown = false; }, 500);
 
+    // AFK FIX 1: orijinal avisoInativo event'ini aktif() ile karsilar
     if(game&&!game.__afkNativeBagli){
         var aktiflik=function(){
             try{ if(typeof game.active==='function') game.active(); }catch(x){}
@@ -435,6 +463,12 @@ function onJoin(game){
                 game.__afkNativeBagli=true;
             }
         }catch(x){}
+    }
+
+    // AFK FIX 2: garantili 60sn'lik periyodik active() timer'i — hicbir kosulda AFK olmaz
+    if(game&&!game.__afkTimerBagli){
+        game.__afkTimerBagli=true;
+        startAfkTimer(game);
     }
 
     var room=document.querySelector('#screenRoom');
@@ -452,6 +486,7 @@ function onJoin(game){
             if(target.closest('#popUp,.contentPopup,[class*="popup"]')) return;
             if(!/(^|[ _-])(exit|leave|close|quit)([ _-]|$)/.test(signature)) return;
             e.preventDefault(); e.stopPropagation();
+            clearAfkTimer();
             try{ game.exit(); }catch(x){}
             delete _owner._game;
         },true);
@@ -459,6 +494,7 @@ function onJoin(game){
     addEventListener('keydown',function(e){
         if(e.code==='Escape'){
             e.preventDefault();
+            clearAfkTimer();
             try{ game.exit(); }catch(x){}
             delete _owner._game;
         }
