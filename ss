@@ -12,10 +12,8 @@ var win = typeof unsafeWindow !== 'undefined' ? unsafeWindow : window,
     tokens = [], fetching = false, cIdx = 0,
     _owner = win._owner || (win._owner = {});
 
-// --- ANTI-KICK DEĞİŞKENLERİ ---
 var myBotID = null, myLongID = null, isRejoinInProgress = false, gameSocket = null, kickCooldown = false;
 
-// --- VOTEKICK TAKİBİ ---
 var voteTracker = {};
 
 function getVoteThreshold(userCount) {
@@ -26,7 +24,6 @@ function resetVoteTracker() {
     voteTracker = {};
 }
 
-// WebSocket hook
 (function hookWebSocket(){
     var OrigWS = win.WebSocket;
     win.WebSocket = function(){
@@ -50,7 +47,6 @@ function resetVoteTracker() {
             try {
                 var msg = e.data;
 
-                // Odaya giriş — ID'leri al
                 if(msg.indexOf('42["5"') !== -1){
                     var parsed = JSON.parse('["5"' + msg.split('42["5"')[1]);
                     myLongID = parsed[1];
@@ -58,7 +54,6 @@ function resetVoteTracker() {
                     resetVoteTracker();
                 }
 
-                // --- VOTEKICK EVENT ---
                 if(msg.indexOf('42[45,') !== -1 || msg.indexOf('42["45"') !== -1){
                     try {
                         var rawStart = msg.indexOf('42[45,') !== -1
@@ -105,7 +100,6 @@ function resetVoteTracker() {
                     } catch(x){}
                 }
 
-                // Admin/owner kick — event 39
                 if(msg.indexOf('42[39,') !== -1 || msg.indexOf('42["39"') !== -1){
                     try {
                         var kickRaw = msg.indexOf('42[39,') !== -1
@@ -141,7 +135,6 @@ function resetVoteTracker() {
                     } catch(x){}
                 }
 
-                // Doğrudan kick
                 if(msg.includes('42["45"') || msg.includes('42[45,')){
                     var kickData;
                     try {
